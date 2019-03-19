@@ -34,18 +34,21 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public class IteratorMap<T, R> implements Iterator<R> {
+    final Iterator<T> src;
+    final Function<T, R> mapper;
 
     public IteratorMap(Iterable<T> src, Function<T, R> mapper) {
-
+        this.src = src.iterator();
+        this.mapper = mapper;
     }
 
     @Override
     public boolean hasNext() {
-        throw new UnsupportedOperationException();
+        return src.hasNext();
     }
 
     @Override
     public R next() {
-        throw new UnsupportedOperationException();
+        return mapper.apply(src.next());
     }
 }

@@ -41,16 +41,7 @@ import java.util.Random;
 import static java.lang.System.out;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
-import static org.isel.jingle.util.queries.LazyQueries.count;
-import static org.isel.jingle.util.queries.LazyQueries.filter;
-import static org.isel.jingle.util.queries.LazyQueries.first;
-import static org.isel.jingle.util.queries.LazyQueries.generate;
-import static org.isel.jingle.util.queries.LazyQueries.iterate;
-import static org.isel.jingle.util.queries.LazyQueries.limit;
-import static org.isel.jingle.util.queries.LazyQueries.map;
-import static org.isel.jingle.util.queries.LazyQueries.max;
-import static org.isel.jingle.util.queries.LazyQueries.skip;
-import static org.isel.jingle.util.queries.LazyQueries.toArray;
+import static org.isel.jingle.util.queries.LazyQueries.*;
 import static org.junit.Assert.assertArrayEquals;
 
 
@@ -96,10 +87,46 @@ public class LazyQueriesTest {
         // Object[] nrs = toArray(iterate(1, n -> n + 1));
 
         Iterable<Integer> nrs = iterate(1, n -> n + 1);
-        Optional<Integer> first = first(filter(map(nrs,
-            n -> n * n),
-            n -> n > 3));
+        Optional<Integer> first =
+                first(
+                    filter(
+                        map(nrs, n -> n * n),
+                        n -> n > 3));
         int val = first.orElseThrow(() ->{ throw new AssertionFailedError("Max returning NO value!"); });
         assertEquals(4, val);
+    }
+
+    @Test
+    public void testLast() {
+        Iterable<Integer> nrs = iterate(1, n -> n + 1);
+        int last = last(limit(nrs, 100));
+        assertEquals(100, last);
+    }
+
+    @Test
+    public void testFrom() {
+        Object[] nrs = {1, 2, 3, 4, 5};
+        Iterable<Object> actual = from(nrs);
+        assertEquals(5, count(actual));
+    }
+
+    @Test
+    public void testTakeWhile() {
+        Iterable<Integer> nrs = from( new Integer[]{2, 4, 6, 7, 8, 10});
+        Object[] expected = {2, 4, 6};
+        Object[] actual = toArray(takeWhile(nrs, n -> n % 2 == 0));
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void testFlatMap() {
+        Iterable<String> words = from( new String[]{"isel", "super", "ola"});
+        Object[] expected = {'i', 's', 'e', 'l', 's', 'u', 'p', 'e', 'r', 'o', 'l', 'a'};
+
+        Object[] actual = toArray(flatMap(words, word -> {
+            //TODO Create Char Iterator for String
+            return map(from(word), c -> );
+        }));
+        assertArrayEquals(expected, actual);
     }
 }
