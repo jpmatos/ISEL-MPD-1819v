@@ -31,14 +31,12 @@
 package org.isel.jingle;
 
 import com.google.gson.Gson;
-import org.isel.jingle.dto.AlbumDto;
-import org.isel.jingle.dto.ArtistDto;
-import org.isel.jingle.dto.TrackDto;
+import org.isel.jingle.dto.*;
 import org.isel.jingle.util.req.Request;
 
 
 public class LastfmWebApi {
-    private static final String LASTFM_API_KEY = "*****************************";
+    private static final String LASTFM_API_KEY = "a7e0132cafc3d836c175c7c71c09641f";
     private static final String LASTFM_HOST = "http://ws.audioscrobbler.com/2.0/";
     private static final String LASTFM_SEARCH = LASTFM_HOST
                                                     + "?method=artist.search&format=json&artist=%s&page=%d&api_key="
@@ -64,12 +62,24 @@ public class LastfmWebApi {
     }
 
     public ArtistDto[] searchArtist(String name, int page) {
-        throw new UnsupportedOperationException();
+        String path = String.format(LASTFM_SEARCH, name, page);
+        Iterable<String> lines = request.getLines(path);
+        String body = String.join("", lines);
+        SearchArtistDto dto = gson.fromJson(body, SearchArtistDto.class);
+        return dto.getResults().getArtistmatches().getArtist();
     }
     public AlbumDto[] getAlbums(String artistMbid, int page) {
-        throw new UnsupportedOperationException();
+        String path = String.format(LASTFM_GET_ALBUMS, artistMbid, page);
+        Iterable<String> lines = request.getLines(path);
+        String body = String.join("", lines);
+        GetAlbumDto dto = gson.fromJson(body, GetAlbumDto.class);
+        return dto.getTopalbums().getAlbum();
     }
     public TrackDto[] getAlbumInfo(String albumMbid){
-        throw new UnsupportedOperationException();
+        String path = String.format(LASTFM_GET_ALBUM_INFO, albumMbid);
+        Iterable<String> lines = request.getLines(path);
+        String body = String.join("", lines);
+        GetAlbumInfoDto dto = gson.fromJson(body, GetAlbumInfoDto.class);
+        return dto.getAlbum().getTracks().getTrack();
     }
 }
