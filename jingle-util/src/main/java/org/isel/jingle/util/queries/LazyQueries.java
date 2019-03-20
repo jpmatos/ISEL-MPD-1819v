@@ -142,7 +142,9 @@ public class LazyQueries {
 
             @Override
             public T next() {
-                return src[index++];
+                T temp = src[index];
+                index++;
+                return temp;
             }
         };
     }
@@ -177,7 +179,31 @@ public class LazyQueries {
         };
     }
     public static <T, R> Iterable<R> flatMap(Iterable<T> src, Function<T, Iterable<R>> mapper){
-        throw new UnsupportedOperationException();
+        return () -> new Iterator<R>() {
+            private Iterator<T> items = src.iterator();
+            private Iterator<R> mapped = null;
+            @Override
+            public boolean hasNext() {
+                if(mapped == null) {
+                    if (!items.hasNext())
+                        return false;
+                    mapped = mapper.apply(items.next()).iterator();
+                }
+
+                if(!mapped.hasNext()){
+                    while(!mapped.hasNext() && items.hasNext())
+                        mapped = mapper.apply(items.next()).iterator();
+                    return mapped.hasNext();
+                }
+                return true;
+            }
+
+            @Override
+            public R next() {
+                if(!hasNext()) throw new NoSuchElementException();
+                return mapped.next();
+            }
+        };
     }
 
     public static <T> T last(Iterable<T> src) {

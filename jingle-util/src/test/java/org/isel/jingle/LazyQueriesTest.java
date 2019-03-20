@@ -124,8 +124,8 @@ public class LazyQueriesTest {
         Object[] expected = {'i', 's', 'e', 'l', 's', 'u', 'p', 'e', 'r', 'o', 'l', 'a'};
 
         Object[] actual = toArray(flatMap(words, word -> {
-            //TODO Create Char Iterator for String
-            return map(from(word), c -> );
+            Character[] charObjectArray = word.chars().mapToObj(c -> (char)c).toArray(Character[]::new);
+            return from(charObjectArray);
         }));
         assertArrayEquals(expected, actual);
     }
