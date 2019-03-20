@@ -30,22 +30,17 @@
 
 package org.isel.jingle.util.queries;
 
-import org.isel.jingle.util.iterators.IteratorFilter;
-import org.isel.jingle.util.iterators.IteratorLimit;
-import org.isel.jingle.util.iterators.IteratorMap;
+import org.isel.jingle.util.iterators.*;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 public class LazyQueries {
 
     public static <T> Iterable<T> filter(Iterable<T> src, Predicate<T> pred){
-        return () -> new IteratorFilter(src, pred);
+        return () -> new IteratorFilter<>(src, pred);
     }
 
     public static <T> Iterable<T> skip(Iterable<T> src, int nr){
@@ -62,28 +57,11 @@ public class LazyQueries {
     }
 
     public static <T, R> Iterable<R> map(Iterable<T> src, Function<T, R> mapper){
-        return () -> new IteratorMap(src, mapper);
+        return () -> new IteratorMap<>(src, mapper);
     }
 
     public static <T> Iterable<T> generate(Supplier<T> next){
-        return () -> new Iterator<T>() {
-            private T res;
-            @Override
-            public boolean hasNext() {
-                if(res == null)
-                    res = next.get();
-                return res != null;
-            }
-
-            @Override
-            public T next() {
-                if(res == null)
-                    return next.get();
-                T cur = res;
-                res = null;
-                return cur;
-            }
-        };
+        return () -> new IteratorGenerate<>(next);
     }
 
     public static <T> Iterable<T> iterate(T seed, Function<T, T> next){
@@ -114,7 +92,7 @@ public class LazyQueries {
 
     public static <T> Optional<T> first(Iterable<T> src) {
         Iterator<T> iter = src.iterator();
-        return iter.hasNext() ? Optional.of(iter.next()) : null;
+        return iter.hasNext() ? Optional.of(iter.next()) : Optional.empty();
     }
 
     public static <T extends Comparable<T>> Optional<T> max(Iterable<T> src) {
@@ -131,79 +109,14 @@ public class LazyQueries {
     }
 
     public static <T> Iterable<T> from(T[] items) {
-        return () -> new Iterator<T>() {
-            private T[] src = items;
-            private int index = 0;
-
-            @Override
-            public boolean hasNext() {
-                return index < src.length;
-            }
-
-            @Override
-            public T next() {
-                T temp = src[index];
-                index++;
-                return temp;
-            }
-        };
+        return () -> new IteratorFrom<>(items);
     }
 
     public static <T> Iterable<T> takeWhile(Iterable<T> src, Predicate<T> pred){
-        return () -> new Iterator<T>() {
-            private Iterator<T> items = src.iterator();
-            private T next = null;
-            private boolean open = true;
-
-            @Override
-            public boolean hasNext() {
-                if(!open) return false;
-                if (next == null){
-                    if(items.hasNext()) {
-                        next = items.next();
-                        if (pred.test(next)) {
-                            return true;
-                        }
-                    }
-                    return open = false;
-                }
-                return true;
-            }
-
-            @Override
-            public T next() {
-                T aux = next;
-                next = null;
-                return aux;
-            }
-        };
+        return () -> new IteratorTakeWhile<>(src, pred);
     }
     public static <T, R> Iterable<R> flatMap(Iterable<T> src, Function<T, Iterable<R>> mapper){
-        return () -> new Iterator<R>() {
-            private Iterator<T> items = src.iterator();
-            private Iterator<R> mapped = null;
-            @Override
-            public boolean hasNext() {
-                if(mapped == null) {
-                    if (!items.hasNext())
-                        return false;
-                    mapped = mapper.apply(items.next()).iterator();
-                }
-
-                if(!mapped.hasNext()){
-                    while(!mapped.hasNext() && items.hasNext())
-                        mapped = mapper.apply(items.next()).iterator();
-                    return mapped.hasNext();
-                }
-                return true;
-            }
-
-            @Override
-            public R next() {
-                if(!hasNext()) throw new NoSuchElementException();
-                return mapped.next();
-            }
-        };
+        return () -> new IteratorFlatMap<>(src, mapper);
     }
 
     public static <T> T last(Iterable<T> src) {

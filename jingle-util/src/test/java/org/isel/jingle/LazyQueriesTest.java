@@ -76,7 +76,7 @@ public class LazyQueriesTest {
     @Test
     public void testMap(){
         List<String> words = asList("super", "isel", "ola", "fcp");
-        Object[] actual = toArray(map(words, w -> w.length()));
+        Object[] actual = toArray(map(words, String::length));
         Object[] expected = { 5, 4, 3, 3 };
         assertArrayEquals(expected, actual);
     }
