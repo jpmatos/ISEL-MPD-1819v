@@ -65,15 +65,7 @@ public class LazyQueries {
     }
 
     public static <T> Iterable<T> iterate(T seed, Function<T, T> next){
-        return () -> new Iterator<T>() {
-            T curr = seed;
-            public boolean hasNext() { return true; }
-            public T next() {
-                T tmp = curr;
-                curr = next.apply(tmp);
-                return tmp;
-            }
-        };
+        return () -> new IteratorIterate<>(seed, next);
     }
 
     public static <T> int count(Iterable<T> src) {
