@@ -53,7 +53,7 @@ public class JingleServiceTest {
         }
     }
 
-    @Test
+    @Test //TODO requests: 500+
     public void searchHiperAndCountAllResults() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
@@ -66,7 +66,7 @@ public class JingleServiceTest {
         assertEquals(50, httpGet.count);
     }
 
-    @Test
+    @Test //passes
     public void getFirstAlbumOfMuse() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
@@ -77,35 +77,33 @@ public class JingleServiceTest {
         Iterable<Album> albums = muse.getAlbums();
         assertEquals(1, httpGet.count);
         Album first = first(albums).get();
-        assertEquals(2, httpGet.count); //TODO count equals 3
+        assertEquals(2, httpGet.count);
         assertEquals("Black Holes and Revelations", first.getName());
     }
 
-    @Test
+    @Test   //TODO requests: 600+
     public void get111AlbumsOfMuse() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Artist muse = first(service.searchArtist("muse")).get();
         Iterable<Album> albums = limit(muse.getAlbums(), 111);
         assertEquals(111, count(albums));
-        //Object[] res = toArray(albums);
         assertEquals(4, httpGet.count); // 1 for artist + 3 pages of albums each with 50 albums
     }
 
-    @Test
+    @Test   //passes
     public void getSecondSongFromBlackHolesAlbumOfMuse() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Album blackHoles = first(first(service.searchArtist("muse")).get().getAlbums()).get();
-        //assertEquals(2, httpGet.count); // 1 for artist + 1 page of albums
+        assertEquals(2, httpGet.count); // 1 for artist + 1 page of albums
         assertEquals("Black Holes and Revelations", blackHoles.getName());
-        Object obj = toArray(blackHoles.getTracks());
         Track song = first(skip(blackHoles.getTracks(), 1)).get();
         assertEquals(3, httpGet.count); // + 1 to getTracks
         assertEquals("Starlight", song.getName());
     }
 
-    @Test
+    @Test   //passes
     public void get42thTrackOfMuse() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
@@ -115,12 +113,11 @@ public class JingleServiceTest {
         assertEquals("MK Ultra", track.getName());
         assertEquals(6, httpGet.count);
     }
-    @Test
+    @Test //TODO requests: 80
     public void getLastTrackOfMuseOf500() {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Iterable<Track> tracks = limit(first(service.searchArtist("muse")).get().getTracks(), 500);
-        Object obj = toArray(tracks);
         assertEquals(500, count(tracks));
         assertEquals(78, httpGet.count); // Each page has 50 albums => 50 requests to get their tracks. Some albums have no tracks.
     }

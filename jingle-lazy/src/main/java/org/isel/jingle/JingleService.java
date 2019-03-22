@@ -60,210 +60,55 @@ public class JingleService {
 
     public Iterable<Artist> searchArtist(String name) {
         Iterable<Integer> indexes = iterate(1, i -> i + 1);
-
         Iterable<ArtistDto[]> map = map(indexes, i -> api.searchArtist(name, i));
-
         Iterable<ArtistDto[]> artistDtos = takeWhile(map, Objects::nonNull);
-
         Iterable<ArtistDto> flattenedArtists = flatMap(artistDtos, LazyQueries::from);
 
         return LazyQueries.map(flattenedArtists, artist -> new Artist(
-                artist.getName(),
-                artist.getListeners(),
-                artist.getMbid(),
-                artist.getUrl(),
-                artist.getImage()[0].toString(),
-                getAlbums(artist.getMbid()),
-                getTracks(artist.getMbid())
-            )
+                        artist.getName(),
+                        artist.getListeners(),
+                        artist.getMbid(),
+                        artist.getUrl(),
+                        artist.getImage()[0].toString(),
+                        getAlbums(artist.getMbid()),
+                        getTracks(artist.getMbid())
+                )
         );
-//        return () -> new Iterator<Artist>() {
-//            private int page = 1;
-//            private int index = 0;
-//            private ArtistDto[] currentArray = null;
-//            private Artist current = null;
-//
-//            @Override
-//            public boolean hasNext() {
-//                if(current != null) return true;
-//                if(currentArray == null)
-//                    currentArray = api.searchArtist(name, page);
-//                if(index >= currentArray.length){
-//                    page++;
-//                    currentArray = api.searchArtist(name, page);
-//                    index = 0;
-//                    if(currentArray.length == 0)
-//                        return false;
-//                }
-//                ArtistDto artist = currentArray[index++];
-//                current = new Artist(
-//                        artist.getName(),
-//                        artist.getListeners(),
-//                        artist.getMbid(),
-//                        artist.getUrl(),
-//                        artist.getImage()[0].toString(),
-//                        getAlbums(artist.getMbid()),
-//                        getTracks(artist.getMbid())
-//                );
-//                return true;
-//            }
-//
-//            @Override
-//            public Artist next() {
-//                if(!hasNext()) throw new NoSuchElementException();
-//                Artist aux = current;
-//                current = null;
-//                return aux;
-//            }
-//        };
     }
 
     private Iterable<Album> getAlbums(String artistMbid) {
         Iterable<Integer> indexes = iterate(1, i -> i + 1);
-
         Iterable<AlbumDto[]> albums = map(indexes, i -> api.getAlbums(artistMbid, i));
-
         Iterable<AlbumDto[]> albumDtos = takeWhile(albums, Objects::nonNull);
-
         Iterable<AlbumDto> flattenedAlbums = flatMap(albumDtos, LazyQueries::from);
-
         Iterable<AlbumDto> albumsWithId = filter(flattenedAlbums, album -> album.getMbid() != null);
 
-        return LazyQueries.map(albumsWithId, album ->{
-           return new Album(
-                   album.getName(),
-                   album.getPlaycount(),
-                   album.getMbid(),
-                   album.getUrl(),
-                   album.getImage()[0].toString(),
-                   getAlbumTracks(album.getMbid())
-           );
-        });
-
-//        return () -> new Iterator<Album>() {
-//            private int page = 1;
-//            private int index = 0;
-//            private AlbumDto[] currentArray = null;
-//            private Album current = null;
-//
-//            @Override
-//            public boolean hasNext() {
-//                if(current != null) return true;
-//                if(currentArray == null)
-//                    currentArray = api.getAlbums(artistMbid, page);
-//                if(index >= currentArray.length){
-//                    page++;
-//                    currentArray = api.getAlbums(artistMbid, page);
-//                    if(currentArray.length == 0)
-//                        return false;
-//                    index = 0;
-//                }
-//                AlbumDto album = currentArray[index++];
-//                current = new Album(
-//                        album.getName(),
-//                        album.getPlaycount(),
-//                        album.getMbid(),
-//                        album.getUrl(),
-//                        album.getImage()[0].toString(),
-//                        getAlbumTracks(album.getMbid())
-//                );
-//                return true;
-//            }
-//
-//            @Override
-//            public Album next() {
-//                if(!hasNext()) throw new NoSuchElementException();
-//                Album aux = current;
-//                current = null;
-//                return aux;
-//            }
-//        };
+        return LazyQueries.map(albumsWithId, album -> new Album(
+                        album.getName(),
+                        album.getPlaycount(),
+                        album.getMbid(),
+                        album.getUrl(),
+                        album.getImage()[0].toString(),
+                        getAlbumTracks(album.getMbid())
+                )
+        );
     }
 
     private Iterable<Track> getAlbumTracks(String albumMbid) {
-        TrackDto[] albumInfo = api.getAlbumInfo(albumMbid);
-        return map(from(albumInfo), track -> new Track(track.getName(), track.getUrl(), track.getDuration()));
-//        return () -> new Iterator<Track>() {
-//            private TrackDto[] albumInfo;
-//            private int index = 0;
-//            private Track current;
-//
-//            @Override
-//            public boolean hasNext() {
-//                if(albumInfo == null)
-//                    albumInfo = api.getAlbumInfo(albumMbid);
-//                if(current != null) return true;
-//                if(index >= albumInfo.length)
-//                    return false;
-//                TrackDto track = albumInfo[index++];
-//                current = new Track(
-//                        track.getName(),
-//                        track.getUrl(),
-//                        track.getDuration()
-//                );
-//                return true;
-//            }
-//
-//            @Override
-//            public Track next() {
-//                if(!hasNext()) throw new NoSuchElementException();
-//                Track aux = current;
-//                current = null;
-//                return aux;
-//            }
-//        };
+        return () -> map(
+                        from(api.getAlbumInfo(albumMbid)),
+                        track -> new Track(
+                                track.getName(),
+                                track.getUrl(),
+                                track.getDuration()
+                        )
+        ).iterator();
     }
 
     private Iterable<Track> getTracks(String artistMbid) {
-        Iterable<Album> albums = getAlbums(artistMbid);
-
-        Iterable<Album> albumsWithID = filter(albums, album -> album.getMbid() != null);
-
-        return flatMap(albumsWithID, Album::getTracks);
-//        return () -> new Iterator<Track>() {
-//            private Iterator<Album> albums;
-//            private Album album;
-//            private Iterator<Track> tracks;
-//            private Track track;
-//            private int skipped;
-//
-//            @Override
-//            public boolean hasNext() {
-//                if(track != null) return true;
-//                if(albums == null)
-//                    albums = getAlbums(artistMbid).iterator();
-//                if(album == null)
-//                    album = albums.next();
-//                if(tracks == null)
-//                    tracks = album.getTracks().iterator();
-//
-//                if(!albums.hasNext() && !tracks.hasNext())
-//                    return false;
-//
-//                if(!tracks.hasNext()){
-//                    album = albums.next();
-//                    while(album.getMbid() == null) {    //Skip Albums without an mbid
-//                        album = albums.next();
-//                        skipped++;
-//                        System.out.println("Skipped: " + skipped);
-//                    }
-//                    tracks = album.getTracks().iterator();
-//                    if(!tracks.hasNext())
-//                        return false;
-//                }
-//
-//                track = tracks.next();
-//                return true;
-//            }
-//
-//            @SuppressWarnings("Duplicates")
-//            @Override
-//            public Track next() {
-//                if(!hasNext()) throw new NoSuchElementException();
-//                Track aux = track;
-//                track = null;
-//                return aux;
-//            }
-//        };
+        return () -> flatMap(
+                            filter(getAlbums(artistMbid), album -> album.getMbid() != null),
+                            Album::getTracks
+        ).iterator();
     }
 }
