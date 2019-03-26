@@ -61,7 +61,7 @@ public class JingleService {
     public Iterable<Artist> searchArtist(String name) {
         Iterable<Integer> indexes = iterate(1, i -> i + 1);
         Iterable<ArtistDto[]> map = map(indexes, i -> api.searchArtist(name, i));
-        Iterable<ArtistDto[]> artistDtos = takeWhile(map, Objects::nonNull);
+        Iterable<ArtistDto[]> artistDtos = takeWhile(map, arr -> arr.length != 0);
         Iterable<ArtistDto> flattenedArtists = flatMap(artistDtos, LazyQueries::from);
 
         return LazyQueries.map(flattenedArtists, artist -> new Artist(
@@ -77,21 +77,21 @@ public class JingleService {
     }
 
     private Iterable<Album> getAlbums(String artistMbid) {
-        Iterable<Integer> indexes = iterate(1, i -> i + 1);
-        Iterable<AlbumDto[]> albums = map(indexes, i -> api.getAlbums(artistMbid, i));
-        Iterable<AlbumDto[]> albumDtos = takeWhile(albums, Objects::nonNull);
-        Iterable<AlbumDto> flattenedAlbums = flatMap(albumDtos, LazyQueries::from);
-        Iterable<AlbumDto> albumsWithId = filter(flattenedAlbums, album -> album.getMbid() != null);
-
-        return LazyQueries.map(albumsWithId, album -> new Album(
-                        album.getName(),
-                        album.getPlaycount(),
-                        album.getMbid(),
-                        album.getUrl(),
-                        album.getImage()[0].toString(),
-                        getAlbumTracks(album.getMbid())
-                )
-        );
+        return () -> {
+            Iterable<Integer> indexes = iterate(1, i -> i + 1);
+            Iterable<AlbumDto[]> albums = map(indexes, i -> api.getAlbums(artistMbid, i));
+            Iterable<AlbumDto[]> albumDtos = takeWhile(albums, arr -> arr.length != 0);
+            Iterable<AlbumDto> flattenedAlbums = flatMap(albumDtos, LazyQueries::from);
+            Iterable<AlbumDto> albumsWithId = filter(flattenedAlbums, album -> album.getMbid() != null);
+            return LazyQueries.map(albumsWithId, album -> new Album(
+                            album.getName(),
+                            album.getPlaycount(),
+                            album.getMbid(),
+                            album.getUrl(),
+                            album.getImage()[0].toString(),
+                            getAlbumTracks(album.getMbid()))
+            ).iterator();
+        };
     }
 
     private Iterable<Track> getAlbumTracks(String albumMbid) {

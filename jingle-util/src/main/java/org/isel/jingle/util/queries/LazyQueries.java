@@ -70,9 +70,7 @@ public class LazyQueries {
 
     public static <T> int count(Iterable<T> src) {
         int count = 0;
-        for (T item : src) {
-            count++;
-        }
+        for (T item : src) count++;
         return count;
     }
 
@@ -117,5 +115,9 @@ public class LazyQueries {
             res = item;
         }
         return res;
+    }
+
+    public static <T> Iterable<T> cache(Iterable<T> src){
+        return () -> new IteratorCache<>(src);
     }
 }

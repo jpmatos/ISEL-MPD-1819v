@@ -58,12 +58,13 @@ public class JingleServiceTest {
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Iterable<Artist> artists = service.searchArtist("hiper");
+        artists = cache(artists);
         assertEquals(0, httpGet.count);
-        assertEquals(701, count(artists));
+        assertEquals(702, count(artists));
         assertEquals(25, httpGet.count);
         Artist last = last(artists);
         assertEquals("Coma - Hipertrofia.(2008)", last.getName());
-        assertEquals(50, httpGet.count);
+        assertEquals(25, httpGet.count);
     }
 
     @Test //passes
