@@ -5,36 +5,32 @@ import java.util.*;
 public class IteratorCache<T> implements Iterator<T> {
 
     private Iterator<T> src;
-    private static Map<Iterable<Object>, ArrayList<Object>> caches = new HashMap<Iterable<Object>, ArrayList<Object>>();
-    private ArrayList<Object> cache;
+    private ArrayList<T> cache;
     private int cacheIndex = 0;
 
-    public IteratorCache(Iterable<T> iter) {
-        this.src = iter.iterator();
-        ArrayList<Object> cache = caches.get(iter);
-        if(cache == null){
-            cache = new ArrayList<>();
-            caches.put((Iterable<Object>) iter, cache);
-        }
+    public IteratorCache(Iterator<T> src, ArrayList<T> cache) {
+        this.src = src;
+        //this.cacheIndex = 0;
         this.cache = cache;
     }
 
     @Override
     public boolean hasNext() {
-        if(cacheIndex < cache.size() || src.hasNext())
+        if(cacheIndex < cache.size())
             return true;
-        return false;
+        return src.hasNext();
     }
 
     @Override
     public T next() {
         if(cacheIndex < cache.size()){
-            src.next();
-            return (T) cache.get(cacheIndex++);
+            //if(src.hasNext()) src.next();
+            return cache.get(cacheIndex++);
         }
         if(!src.hasNext()) throw new NoSuchElementException();
         T aux = src.next();
         cache.add(aux);
+        cacheIndex++;
         return aux;
     }
 }

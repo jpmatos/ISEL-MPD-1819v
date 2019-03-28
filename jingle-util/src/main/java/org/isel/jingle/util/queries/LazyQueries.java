@@ -117,7 +117,9 @@ public class LazyQueries {
         return res;
     }
 
-    public static <T> Iterable<T> cache(Iterable<T> src){
-        return () -> new IteratorCache<>(src);
+    public static <T> Iterable<T> cache(Iterable<T> iter){
+        ArrayList<T> cache = new ArrayList<>();
+        Iterator<T> src = iter.iterator();
+        return () -> new IteratorCache<T>(src, cache);
     }
 }

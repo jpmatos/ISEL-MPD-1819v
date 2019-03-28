@@ -82,8 +82,7 @@ public class JingleService {
             Iterable<AlbumDto[]> albums = map(indexes, i -> api.getAlbums(artistMbid, i));
             Iterable<AlbumDto[]> albumDtos = takeWhile(albums, arr -> arr.length != 0);
             Iterable<AlbumDto> flattenedAlbums = flatMap(albumDtos, LazyQueries::from);
-            Iterable<AlbumDto> albumsWithId = filter(flattenedAlbums, album -> album.getMbid() != null);
-            return LazyQueries.map(albumsWithId, album -> new Album(
+            return LazyQueries.map(flattenedAlbums, album -> new Album(
                             album.getName(),
                             album.getPlaycount(),
                             album.getMbid(),
