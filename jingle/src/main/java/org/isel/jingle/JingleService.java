@@ -37,6 +37,10 @@ import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import util.req.BaseRequest;
 import util.req.HttpRequest;
+import java.util.stream.Stream;
+
+import static java.util.stream.Stream.*;
+
 
 public class JingleService {
 
@@ -50,56 +54,64 @@ public class JingleService {
         this(new LastfmWebApi(new BaseRequest(HttpRequest::openStream)));
     }
 
-    public Iterable<Artist> searchArtist(String name) {
-        Iterable<Integer> indexes = iterate(1, i -> i + 1);
-        Iterable<ArtistDto[]> map = map(indexes, i -> api.searchArtist(name, i));
-        Iterable<ArtistDto[]> artistDtos = takeWhile(map, arr -> arr.length != 0);
-        Iterable<ArtistDto> flattenedArtists = flatMap(artistDtos, LazyQueries::from);
+    public Stream<Artist> searchArtist(String name) {
+        Stream<Integer> indexes = iterate(1, i -> i + 1);
+        Stream<ArtistDto[]> map = indexes.map(i -> api.searchArtist(name, i));
+        Stream<ArtistDto[]> artistDtos = map.takeWhile(arr -> arr.length != 0);
+        Stream<ArtistDto> flattenedArtists = artistDtos.flatMap(Stream::of);
 
-        return LazyQueries.map(flattenedArtists, artist -> new Artist(
+        return flattenedArtists.map(artist -> new Artist(
                         artist.getName(),
                         artist.getListeners(),
                         artist.getMbid(),
                         artist.getUrl(),
                         artist.getImage()[0].toString(),
-                        getAlbums(artist.getMbid()),
-                        getTracks(artist.getMbid())
+                        () -> getAlbums(artist.getMbid()),
+                        () -> getTracks(artist.getMbid())
                 )
         );
     }
 
-    private Iterable<Album> getAlbums(String artistMbid) {
-        return () -> {
-            Iterable<Integer> indexes = iterate(1, i -> i + 1);
-            Iterable<AlbumDto[]> albums = map(indexes, i -> api.getAlbums(artistMbid, i));
-            Iterable<AlbumDto[]> albumDtos = takeWhile(albums, arr -> arr.length != 0);
-            Iterable<AlbumDto> flattenedAlbums = flatMap(albumDtos, LazyQueries::from);
-            return LazyQueries.map(flattenedAlbums, album -> new Album(
+    private Stream<Album> getAlbums(String artistMbid) {
+        //return () -> {
+            Stream<Integer> indexes = iterate(1, i -> i + 1);
+            Stream<AlbumDto[]> albums = indexes.map(i -> api.getAlbums(artistMbid, i));
+            Stream<AlbumDto[]> albumDtos = albums.takeWhile(arr -> arr.length != 0);
+            Stream<AlbumDto> flattenedAlbums = albumDtos.flatMap(Stream::of);
+            return flattenedAlbums.map(album -> new Album(
                             album.getName(),
                             album.getPlaycount(),
                             album.getMbid(),
                             album.getUrl(),
                             album.getImage()[0].toString(),
-                            getAlbumTracks(album.getMbid()))
-            ).iterator();
-        };
+                            () -> getAlbumTracks(album.getMbid()))
+            );
+        //};
     }
 
-    private Iterable<Track> getAlbumTracks(String albumMbid) {
-        return () -> map(
-                        from(api.getAlbumInfo(albumMbid)),
-                        track -> new Track(
-                                track.getName(),
-                                track.getUrl(),
-                                track.getDuration()
-                        )
-        ).iterator();
+    private Stream<Track> getAlbumTracks(String albumMbid) {
+//        return () -> map(
+//                        from(api.getAlbumInfo(albumMbid)),
+//                        track -> new Track(
+//                                track.getName(),
+//                                track.getUrl(),
+//                                track.getDuration()
+//                        )
+//        ).iterator();
+
+        return Stream.of(api.getAlbumInfo(albumMbid)).map(track -> new Track(
+                track.getName(),
+                track.getUrl(),
+                track.getDuration()
+        ));
     }
 
-    private Iterable<Track> getTracks(String artistMbid) {
-        return () -> flatMap(
-                            filter(getAlbums(artistMbid), album -> album.getMbid() != null),
-                            Album::getTracks
-        ).iterator();
+    private Stream<Track> getTracks(String artistMbid) {
+//        return () -> flatMap(
+//                            filter(getAlbums(artistMbid), album -> album.getMbid() != null),
+//                            Album::getTracks
+//        ).iterator();
+
+        return getAlbums(artistMbid).filter(album -> album.getMbid() != null).flatMap(Album::getTracks);
     }
 }

@@ -31,9 +31,12 @@
 package util.req;
 
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class BaseRequest implements Request {
 
@@ -43,11 +46,9 @@ public class BaseRequest implements Request {
         this.openStream = openStream;
     }
 
-    public final Iterable<String> getLines(String path) {
-
-        return () -> {
+    public final Stream<String> getLines(String path) {
             Supplier<InputStream> in = () -> openStream.apply(path);
-            return new IteratorInputStream(in);
-        };
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in.get()));
+            return reader.lines();
     }
 }

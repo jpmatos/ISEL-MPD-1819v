@@ -34,6 +34,10 @@ import com.google.gson.Gson;
 import org.isel.jingle.dto.*;
 import util.req.Request;
 
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
+
 
 public class LastfmWebApi {
     private static final String LASTFM_API_KEY = "a7e0132cafc3d836c175c7c71c09641f";
@@ -63,22 +67,19 @@ public class LastfmWebApi {
 
     public ArtistDto[] searchArtist(String name, int page) {
         String path = String.format(LASTFM_SEARCH, name, page);
-        Iterable<String> lines = request.getLines(path);
-        String body = String.join("", lines);
+        String body = request.getLines(path).collect(joining());
         SearchArtistDto dto = gson.fromJson(body, SearchArtistDto.class);
         return dto.getResults().getArtistmatches().getArtist();
     }
     public AlbumDto[] getAlbums(String artistMbid, int page) {
         String path = String.format(LASTFM_GET_ALBUMS, artistMbid, page);
-        Iterable<String> lines = request.getLines(path);
-        String body = String.join("", lines);
+        String body = request.getLines(path).collect(joining());
         GetAlbumDto dto = gson.fromJson(body, GetAlbumDto.class);
         return dto.getTopalbums().getAlbum();
     }
     public TrackDto[] getAlbumInfo(String albumMbid){
         String path = String.format(LASTFM_GET_ALBUM_INFO, albumMbid);
-        Iterable<String> lines = request.getLines(path);
-        String body = String.join("", lines);
+        String body = request.getLines(path).collect(joining());
         GetAlbumInfoDto dto = gson.fromJson(body, GetAlbumInfoDto.class);
         return dto.getAlbum().getTracks().getTrack();
     }

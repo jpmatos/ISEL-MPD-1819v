@@ -30,15 +30,18 @@
 
 package org.isel.jingle.model;
 
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 public class Album {
     private final String name;
     private final int playcount;
     private final String mbid;
     private final String url;
     private final String image;
-    private final Iterable<Track> tracks;
+    private final Supplier<Stream<Track>> tracks;
 
-    public Album(String name, int playcount, String mbid, String url, String image, Iterable<Track> tracks) {
+    public Album(String name, int playcount, String mbid, String url, String image, Supplier<Stream<Track>> tracks) {
         this.name = name;
         this.playcount = playcount;
         this.mbid = mbid;
@@ -67,7 +70,7 @@ public class Album {
         return image;
     }
 
-    public Iterable<Track> getTracks() {
-        return tracks;
+    public Stream<Track> getTracks() {
+        return tracks.get();
     }
 }
