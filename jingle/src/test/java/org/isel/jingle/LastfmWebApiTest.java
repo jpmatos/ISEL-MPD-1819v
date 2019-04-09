@@ -33,9 +33,9 @@
 //import org.isel.jingle.dto.AlbumDto;
 //import org.isel.jingle.dto.ArtistDto;
 //import org.isel.jingle.dto.TrackDto;
-//import org.isel.jingle.util.req.BaseRequest;
-//import org.isel.jingle.util.req.HttpRequest;
-//import org.isel.jingle.util.req.Request;
+//import org.isel.jingle.BaseRequest;
+//import org.isel.jingle.HttpRequest;
+//import org.isel.jingle.Request;
 //import org.junit.Test;
 //
 //import static junit.framework.Assert.assertEquals;

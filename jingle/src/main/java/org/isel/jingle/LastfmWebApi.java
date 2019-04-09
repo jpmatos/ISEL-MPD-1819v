@@ -34,8 +34,6 @@ import com.google.gson.Gson;
 import org.isel.jingle.dto.*;
 import util.req.Request;
 
-import java.util.stream.Stream;
-
 import static java.util.stream.Collectors.joining;
 
 
