@@ -1,9 +1,7 @@
 package util;
 
 import util.spliterators.SpliteratorCache;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
