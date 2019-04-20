@@ -139,12 +139,13 @@ public class JingleServiceTest {
     }
 
     @Test
-    public void getDrakeSongsInPortugal(){
+    public void getSongIntroFromDrakeAndRankInPortugal(){
         HttpGet httpGet = new HttpGet();
         JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
         Stream<TrackRank> drakeInPortugal = service.getTracksRank("b49b81cc-d5b7-4bdd-aadb-385df8de69a6", "Portugal");
         TrackRank trackIntro = drakeInPortugal.skip(70).findFirst().get();
         assertEquals(17, httpGet.count);
+        assertEquals("Intro", trackIntro.getName());
         assertEquals(6, trackIntro.getRank());
     }
 }
