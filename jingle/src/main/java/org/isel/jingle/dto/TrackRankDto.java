@@ -6,11 +6,12 @@ public class TrackRankDto {
     private final String name;
     private final String url;
     private final int duration;
+    private int page;
 
     @SerializedName("@attr")
-    private final AttrDto attr;
+    private final TrackRankAttrDto attr;
 
-    public TrackRankDto(String name, String url, int duration, AttrDto attr) {
+    public TrackRankDto(String name, String url, int duration, TrackRankAttrDto attr) {
         this.name = name;
         this.url = url;
         this.duration = duration;
@@ -29,7 +30,15 @@ public class TrackRankDto {
         return duration;
     }
 
-    public AttrDto getAttr() {
+    public TrackRankAttrDto getAttr() {
         return attr;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 }

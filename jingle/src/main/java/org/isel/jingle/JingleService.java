@@ -32,9 +32,11 @@ package org.isel.jingle;
 
 import org.isel.jingle.dto.AlbumDto;
 import org.isel.jingle.dto.ArtistDto;
+import org.isel.jingle.dto.TrackRankDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
+import org.isel.jingle.model.TrackRank;
 import util.req.BaseRequest;
 import util.req.HttpRequest;
 import java.util.stream.Stream;
@@ -59,7 +61,6 @@ public class JingleService {
         Stream<ArtistDto[]> map = indexes.map(i -> api.searchArtist(name, i));
         Stream<ArtistDto[]> artistDtos = map.takeWhile(arr -> arr.length != 0);
         Stream<ArtistDto> flattenedArtists = artistDtos.flatMap(Stream::of);
-
         return flattenedArtists.map(artist -> new Artist(
                         artist.getName(),
                         artist.getListeners(),
@@ -73,7 +74,6 @@ public class JingleService {
     }
 
     private Stream<Album> getAlbums(String artistMbid) {
-        //return () -> {
             Stream<Integer> indexes = iterate(1, i -> i + 1);
             Stream<AlbumDto[]> albums = indexes.map(i -> api.getAlbums(artistMbid, i));
             Stream<AlbumDto[]> albumDtos = albums.takeWhile(arr -> arr.length != 0);
@@ -86,19 +86,9 @@ public class JingleService {
                             album.getImage()[0].toString(),
                             () -> getAlbumTracks(album.getMbid()))
             );
-        //};
     }
 
     private Stream<Track> getAlbumTracks(String albumMbid) {
-//        return () -> map(
-//                        from(api.getAlbumInfo(albumMbid)),
-//                        track -> new Track(
-//                                track.getName(),
-//                                track.getUrl(),
-//                                track.getDuration()
-//                        )
-//        ).iterator();
-
         return Stream.of(api.getAlbumInfo(albumMbid)).map(track -> new Track(
                 track.getName(),
                 track.getUrl(),
@@ -107,11 +97,19 @@ public class JingleService {
     }
 
     private Stream<Track> getTracks(String artistMbid) {
-//        return () -> flatMap(
-//                            filter(getAlbums(artistMbid), album -> album.getMbid() != null),
-//                            Album::getTracks
-//        ).iterator();
-
         return getAlbums(artistMbid).filter(album -> album.getMbid() != null).flatMap(Album::getTracks);
+    }
+
+    public Stream<TrackRank> getTopTracks(String country){
+        Stream<Integer> indexes = iterate(1, i -> i + 1);
+        Stream<TrackRankDto[]> topTracksPages = indexes.map(i -> api.getTopTracks(country, i));
+        Stream<TrackRankDto[]> topTracksPagesLimited = topTracksPages.takeWhile(arr -> arr.length != 0);
+        Stream<TrackRankDto> topTracks = topTracksPagesLimited.flatMap(Stream::of);
+        return topTracks.map(topTrack -> new TrackRank(
+                topTrack.getName(),
+                topTrack.getUrl(),
+                topTrack.getDuration(),
+                topTrack.getAttr().getRank() + ((topTrack.getPage()-1) * 50) + 1
+        ));
     }
 }

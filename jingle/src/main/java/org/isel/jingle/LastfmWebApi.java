@@ -90,6 +90,8 @@ public class LastfmWebApi {
         String path = String.format(LASTFM_GET_TOP_TRACKS, country, page);
         String body = request.getLines(path).collect(joining());
         GetTopTracksDto dto = gson.fromJson(body, GetTopTracksDto.class);
+        for (TrackRankDto track : dto.getTracks().getTrack())
+            track.setPage(dto.getTracks().getAttr().getPage());
         return dto.getTracks().getTrack();
     }
 }

@@ -1,9 +1,9 @@
 package org.isel.jingle.dto;
 
-public class AttrDto {
+public class TrackRankAttrDto {
     private final int rank;
 
-    public AttrDto(int rank) {
+    public TrackRankAttrDto(int rank) {
         this.rank = rank;
     }
 
