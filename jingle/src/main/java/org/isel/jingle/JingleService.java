@@ -37,8 +37,11 @@ import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.model.TrackRank;
+import util.StreamUtils;
 import util.req.BaseRequest;
 import util.req.HttpRequest;
+
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Stream.*;
@@ -111,5 +114,21 @@ public class JingleService {
                 topTrack.getDuration(),
                 topTrack.getAttr().getRank() + ((topTrack.getPage()-1) * 50) + 1
         ));
+    }
+
+    public Stream<TrackRank> getTracksRank(String artistsMbId, String country){
+        Stream<Track> tracks = getTracks(artistsMbId);
+        Stream<TrackRank> top100Tracks = getTopTracks(country).takeWhile(track -> track.getRank() <= 100); //.limit(100)
+        Supplier<Stream<TrackRank>> sup = StreamUtils.merge(
+                () -> tracks,
+                () -> top100Tracks,
+                (track, trackRank) -> track.getName().equals(trackRank.getName()),
+                (track, trackRank) -> trackRank != null ? trackRank : new TrackRank(
+                        track.getName(),
+                        track.getUrl(),
+                        track.getDuration(),
+                        0)
+                );
+        return sup.get();
     }
 }
