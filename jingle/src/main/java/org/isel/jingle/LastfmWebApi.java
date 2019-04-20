@@ -32,6 +32,7 @@ package org.isel.jingle;
 
 import com.google.gson.Gson;
 import org.isel.jingle.dto.*;
+import org.isel.jingle.model.TrackRank;
 import util.req.Request;
 
 import static java.util.stream.Collectors.joining;
@@ -50,6 +51,10 @@ public class LastfmWebApi {
 
     private static final String LASTFM_GET_ALBUM_INFO = LASTFM_HOST
                                                     + "?method=album.getinfo&format=json&mbid=%s&api_key="
+                                                    + LASTFM_API_KEY;
+
+    private static final String LASTFM_GET_TOP_TRACKS = LASTFM_HOST
+                                                    + "?method=geo.gettoptracks&format=json&country=%s&page=%d&api_key="
                                                     + LASTFM_API_KEY;
     private final Request request;
     protected final Gson gson;
@@ -80,5 +85,11 @@ public class LastfmWebApi {
         String body = request.getLines(path).collect(joining());
         GetAlbumInfoDto dto = gson.fromJson(body, GetAlbumInfoDto.class);
         return dto.getAlbum().getTracks().getTrack();
+    }
+    public TrackRankDto[] getTopTracks(String country, int page){
+        String path = String.format(LASTFM_GET_TOP_TRACKS, country, page);
+        String body = request.getLines(path).collect(joining());
+        GetTopTracksDto dto = gson.fromJson(body, GetTopTracksDto.class);
+        return dto.getTracks().getTrack();
     }
 }

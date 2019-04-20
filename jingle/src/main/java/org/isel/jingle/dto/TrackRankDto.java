@@ -1,16 +1,20 @@
-package org.isel.jingle.model;
+package org.isel.jingle.dto;
 
-public class TrackRank {
+import com.google.gson.annotations.SerializedName;
+
+public class TrackRankDto {
     private final String name;
     private final String url;
     private final int duration;
-    private final int rank;
 
-    public TrackRank(String name, String url, int duration, int rank) {
+    @SerializedName("@attr")
+    private final AttrDto attr;
+
+    public TrackRankDto(String name, String url, int duration, AttrDto attr) {
         this.name = name;
         this.url = url;
         this.duration = duration;
-        this.rank = rank;
+        this.attr = attr;
     }
 
     public String getName() {
@@ -25,7 +29,7 @@ public class TrackRank {
         return duration;
     }
 
-    public int getRank() {
-        return rank;
+    public AttrDto getAttr() {
+        return attr;
     }
 }
