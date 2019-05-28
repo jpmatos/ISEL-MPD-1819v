@@ -30,15 +30,20 @@
 
 package org.isel.jingle;
 
+import io.reactivex.Completable;
 import org.isel.jingle.dto.AlbumDto;
 import org.isel.jingle.dto.ArtistDto;
+import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.dto.TrackRankDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.model.TrackRank;
 import util.StreamUtils;
+import util.req.AsyncHttpRequest;
+import io.reactivex.Observable;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -53,11 +58,30 @@ public class JingleService {
         this.api = api;
     }
 
-//    public JingleService() {
-//        this(new LastfmWebApi(new BaseRequest(HttpRequest::openStream)));
-//    }
-//
-//    public Stream<Artist> searchArtist(String name) {
+    public JingleService() {
+        this(new LastfmWebApi(new AsyncHttpRequest()));
+    }
+
+    public Observable<Artist> searchArtist(String name) {
+
+        Stream<CompletableFuture<ArtistDto[]>> cfstream = iterate(1, i -> i + 1)
+                .map(i -> api.searchArtist(name, i));
+
+
+        return Observable.fromIterable(cfstream::iterator)
+                .flatMap(Observable::fromFuture)
+                .takeWhile(arr -> arr.length != 0)
+                .flatMap(Observable::fromArray)
+                .map(artist -> new Artist(
+                        artist.getName(),
+                        artist.getListeners(),
+                        artist.getMbid(),
+                        artist.getUrl(),
+                        artist.getImage()[0].toString(),
+                        getAlbums(artist.getMbid()),
+                        getTracks(artist.getMbid())
+                ));
+
 //        Stream<Integer> indexes = iterate(1, i -> i + 1);
 //        Stream<ArtistDto[]> map = indexes.map(i -> api.searchArtist(name, i));
 //        Stream<ArtistDto[]> artistDtos = map.takeWhile(arr -> arr.length != 0);
@@ -72,10 +96,27 @@ public class JingleService {
 //                        () -> getTracks(artist.getMbid())
 //                )
 //        );
-//    }
-//
-//    private Stream<Album> getAlbums(String artistMbid) {
-//            Stream<Integer> indexes = iterate(1, i -> i + 1);
+    }
+
+    private Observable<Album> getAlbums(String artistMbid) {
+
+        Stream<CompletableFuture<AlbumDto[]>> cfstream = iterate(1, i -> i + 1)
+                .map(i -> api.getAlbums(artistMbid, i));
+
+        return Observable.fromIterable(cfstream::iterator)
+                .flatMap(Observable::fromFuture)
+                .takeWhile(arr -> arr.length != 0)
+                .flatMap(Observable::fromArray)
+                .map(album -> new Album(
+                        album.getName(),
+                        album.getPlaycount(),
+                        album.getMbid(),
+                        album.getUrl(),
+                        album.getImage()[0].toString(),
+                        getAlbumTracks(album.getMbid()))
+                );
+
+//        Stream<Integer> indexes = iterate(1, i -> i + 1);
 //            Stream<AlbumDto[]> albums = indexes.map(i -> api.getAlbums(artistMbid, i));
 //            Stream<AlbumDto[]> albumDtos = albums.takeWhile(arr -> arr.length != 0);
 //            Stream<AlbumDto> flattenedAlbums = albumDtos.flatMap(Stream::of);
@@ -85,21 +126,25 @@ public class JingleService {
 //                            album.getMbid(),
 //                            album.getUrl(),
 //                            album.getImage()[0].toString(),
-//                            () -> getAlbumTracks(album.getMbid()))
+//                            getAlbumTracks(album.getMbid())
 //            );
-//    }
+    }
+
+    private Observable<Track> getAlbumTracks(String albumMbid) {
+        return Observable.fromFuture(api.getAlbumInfo(albumMbid))
+                .flatMap(Observable::fromArray)
+                .map(track -> new Track(
+                        track.getName(),
+                        track.getUrl(),
+                        track.getDuration()
+                ));
+    }
 //
-//    private Stream<Track> getAlbumTracks(String albumMbid) {
-//        return Stream.of(api.getAlbumInfo(albumMbid)).map(track -> new Track(
-//                track.getName(),
-//                track.getUrl(),
-//                track.getDuration()
-//        ));
-//    }
-//
-//    private Stream<Track> getTracks(String artistMbid) {
-//        return getAlbums(artistMbid).filter(album -> album.getMbid() != null).flatMap(Album::getTracks);
-//    }
+    private Observable<Track> getTracks(String artistMbid) {
+        return getAlbums(artistMbid)
+                .filter(album -> album.getMbid() != null)
+                .flatMap(Album::getTracks);
+    }
 //
 //    public Stream<TrackRank> getTopTracks(String country){
 //        Stream<Integer> indexes = iterate(1, i -> i + 1);

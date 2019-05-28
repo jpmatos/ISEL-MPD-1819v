@@ -30,11 +30,15 @@
 
 package org.isel.jingle;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.model.TrackRank;
 import org.junit.Test;
+import util.req.AsyncHttpRequest;
+import util.req.AsyncRequest;
 
 import java.io.InputStream;
 import java.util.function.Function;
@@ -85,14 +89,18 @@ public class JingleServiceTest {
 //        assertEquals("Black Holes and Revelations", first.getName());
 //    }
 //
-//    @Test   //passes
-//    public void get111AlbumsOfMuse() {
-//        HttpGet httpGet = new HttpGet();
-//        JingleService service = new JingleService(new LastfmWebApi(new BaseRequest(httpGet)));
-//        Stream<Album> albums = service.searchArtist("muse").findFirst().get().getAlbums().limit(111);
-//        assertEquals(111, albums.count());
-//        assertEquals(4, httpGet.count); // 1 for artist + 3 pages of albums each with 50 albums
-//    }
+    @Test   //passes
+    public void get111AlbumsOfMuse() {
+        //AsyncRequest httpGet = new AsyncHttpRequest();
+        JingleService service = new JingleService(new LastfmWebApi(new AsyncHttpRequest()));
+        Observable<Album> albums = service
+                .searchArtist("muse")
+                .blockingFirst()
+                .getAlbums()
+                .take(111);
+        assertEquals(111, albums.count().blockingGet().longValue());
+        //assertEquals(4, httpGet.count); // 1 for artist + 3 pages of albums each with 50 albums
+    }
 //
 //    @Test   //passes
 //    public void getSecondSongFromBlackHolesAlbumOfMuse() {

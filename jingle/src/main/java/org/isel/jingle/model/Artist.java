@@ -30,8 +30,7 @@
 
 package org.isel.jingle.model;
 
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import io.reactivex.Observable;
 
 public class Artist {
     final String name;
@@ -39,10 +38,10 @@ public class Artist {
     final String mbid;
     final String url;
     final String image;
-    final Supplier<Stream<Album>> albums;
-    final Supplier<Stream<Track>> tracks;
+    final Observable<Album> albums;
+    final Observable<Track> tracks;
 
-    public Artist(String name, int listeners, String mbid, String url, String image, Supplier<Stream<Album>> albums, Supplier<Stream<Track>> tracks) {
+    public Artist(String name, int listeners, String mbid, String url, String image, Observable<Album> albums, Observable<Track> tracks) {
         this.name = name;
         this.listeners = listeners;
         this.mbid = mbid;
@@ -72,11 +71,11 @@ public class Artist {
         return image;
     }
 
-    public Stream<Album> getAlbums() {
-        return albums.get();
+    public Observable<Album> getAlbums() {
+        return albums;
     }
 
-    public Stream<Track> getTracks() {
-        return tracks.get();
+    public Observable<Track> getTracks() {
+        return tracks;
     }
 }
