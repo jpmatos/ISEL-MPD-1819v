@@ -22,4 +22,9 @@ public class AsyncHttpRequest implements AsyncRequest {
                 .toCompletableFuture()
                 .thenApply(Response::getResponseBody);
     }
+
+    @Override
+    public void close() throws Exception {
+        asyncHttpClient.close();
+    }
 }

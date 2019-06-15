@@ -18,7 +18,7 @@ public class AlbumsController implements AutoCloseable{
 
     public void albumsHandler(RoutingContext ctx) {
         // This handler gets called for each request
-        // that arrives on /artists path
+        // that arrives on /artists/:id/albums path
 
         String mbid = ctx.request().getParam("id");
         String limit = ctx.request().getParam("limit");
@@ -32,6 +32,6 @@ public class AlbumsController implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        // weather.close();
+        service.close();
     }
 }

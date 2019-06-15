@@ -19,7 +19,7 @@ public class TracksController implements AutoCloseable{
 
     private void albumTracksHandler(RoutingContext ctx) {
         // This handler gets called for each request
-        // that arrives on /album/:id/tracks path
+        // that arrives on /albums/:id/tracks path
 
         String mbid = ctx.request().getParam("id");
 
@@ -46,6 +46,6 @@ public class TracksController implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        // weather.close();
+        service.close();
     }
 }

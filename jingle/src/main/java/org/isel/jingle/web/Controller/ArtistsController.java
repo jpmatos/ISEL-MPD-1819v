@@ -32,6 +32,6 @@ public class ArtistsController implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        // weather.close();
+        service.close();
     }
 }

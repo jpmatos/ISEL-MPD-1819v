@@ -11,10 +11,7 @@ import org.xmlet.htmlapifaster.Body;
 import org.xmlet.htmlapifaster.Html;
 import org.xmlet.htmlapifaster.Table;
 import org.xmlet.htmlapifaster.Tbody;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import util.ResponsePrintStream;
 
 public class AlbumsView implements View<Observable<Album>> {
 
@@ -38,21 +35,12 @@ public class AlbumsView implements View<Observable<Album>> {
 
             @Override
             public void onError(Throwable e) {
-                /* TO DO !!! */
+                closeAll(tbody, resp);
             }
 
             @Override
             public void onComplete() {
-                tbody
-                        .__() // tbody
-                        .__() // table
-                        .p()
-                        .small()
-                        .text("Default limit to 10. Use query 'limit=' for more results.")
-                        .__()
-                        .__() // body
-                        .__();// html
-                resp.end();
+                closeAll(tbody, resp);
             }
         });
     }
@@ -79,8 +67,8 @@ public class AlbumsView implements View<Observable<Album>> {
                 .tr()
                 .th().text("Name").__()
                 .th().text("Tracks").__()
-                .__()
-                .__()
+                .__() // tr
+                .__() // thead
                 .tbody();
     }
 
@@ -89,36 +77,16 @@ public class AlbumsView implements View<Observable<Album>> {
                 .tr()
                 .td()
                 .text(album.getName())
-                .__()
+                .__() // td
                 .td()
                 .a()
                 .attrHref(getAlbumTracksLink(album.getMbid()))
                 .text("Tracks")
-                .__()
-                .__(); // td
-//                .td()
-//                .text(artist.getTracks().get())
-//                .__(); // td
+                .__() // a
+                .__();// td
     }
 
     private static String getAlbumTracksLink(String mbid) {
         return "/albums/" + mbid + "/tracks";
-    }
-
-    private static class ResponsePrintStream extends PrintStream {
-        /**
-         * We may improve this with a Buffer.
-         * For now we just want to see the effect of sending
-         * char by char to the browser !!!
-         */
-        public ResponsePrintStream(HttpServerResponse resp) {
-            super(new OutputStream() {
-                @Override
-                public void write(int b) throws IOException {
-                    char c = (char) b;
-                    resp.write(String.valueOf(c));
-                }
-            });
-        }
     }
 }

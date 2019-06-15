@@ -1,59 +1,24 @@
-/*
- * GNU General Public License v3.0
- *
- * Copyright (c) 2019, Miguel Gamboa (gamboa.pt)
- *
- *   All rights granted under this License are granted for the term of
- * copyright on the Program, and are irrevocable provided the stated
- * conditions are met.  This License explicitly affirms your unlimited
- * permission to run the unmodified Program.  The output from running a
- * covered work is covered by this License only if the output, given its
- * content, constitutes a covered work.  This License acknowledges your
- * rights of fair use or other equivalent, as provided by copyright law.
- *
- *   You may make, run and propagate covered works that you do not
- * convey, without conditions so long as your license otherwise remains
- * in force.  You may convey covered works to others for the sole purpose
- * of having them make modifications exclusively for you, or provide you
- * with facilities for running those works, provided that you comply with
- * the terms of this License in conveying all material for which you do
- * not control copyright.  Those thus making or running the covered works
- * for you must do so exclusively on your behalf, under your direction
- * and control, on terms that prohibit them from making any copies of
- * your copyrighted material outside their relationship with you.
- *
- *   Conveying under any other circumstances is permitted solely under
- * the conditions stated below.  Sublicensing is not allowed; section 10
- * makes it unnecessary.
- *
- */
-
 package org.isel.jingle;
 
-import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.isel.jingle.dto.AlbumDto;
 import org.isel.jingle.dto.ArtistDto;
-import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.dto.TrackRankDto;
 import org.isel.jingle.model.Album;
 import org.isel.jingle.model.Artist;
 import org.isel.jingle.model.Track;
 import org.isel.jingle.model.TrackRank;
-import org.reactivestreams.Subscription;
-import util.StreamUtils;
 import util.req.AsyncCompletionHandlerBaseCount;
 import util.req.AsyncHttpRequest;
-import io.reactivex.Observable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.stream.Stream.*;
+import static java.util.stream.Stream.iterate;
 
 
-public class JingleService {
+public class JingleService implements AutoCloseable{
 
     final LastfmWebApi api;
 
@@ -159,5 +124,10 @@ public class JingleService {
 //                        0)
 //                );
 //        return sup.get();
+    }
+
+    @Override
+    public void close() throws Exception {
+        api.close();
     }
 }

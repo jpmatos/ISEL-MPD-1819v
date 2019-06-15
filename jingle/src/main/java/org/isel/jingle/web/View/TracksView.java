@@ -11,10 +11,8 @@ import org.xmlet.htmlapifaster.Body;
 import org.xmlet.htmlapifaster.Html;
 import org.xmlet.htmlapifaster.Table;
 import org.xmlet.htmlapifaster.Tbody;
+import util.ResponsePrintStream;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.time.Duration;
 
 public class TracksView implements View<Observable<Track>> {
@@ -37,21 +35,12 @@ public class TracksView implements View<Observable<Track>> {
 
             @Override
             public void onError(Throwable e) {
-                /* TO DO !!! */
+                closeAll(tbody, resp);
             }
 
             @Override
             public void onComplete() {
-                tbody
-                        .__() // tbody
-                        .__() // table
-                        .p()
-                        .small()
-                        .text("Default limit to 10. Use query 'limit=' for more results.")
-                        .__()
-                        .__() // body
-                        .__();// html
-                resp.end();
+                closeAll(tbody, resp);
             }
         });
     }
@@ -67,20 +56,20 @@ public class TracksView implements View<Observable<Track>> {
                 .html()
                 .head()
                 .title()
-                .text("Track")
-                .__()// title
-                .__()// head
+                .text("Tracks")
+                .__() // title
+                .__() // head
                 .body()
                 .h1()
                 .text("Tracks")
-                .__()// h1
+                .__() // h1
                 .table()
                 .thead()
                 .tr()
                 .th().text("Name").__()
                 .th().text("Duration").__()
-                .__()
-                .__()
+                .__() // tr
+                .__() // table
                 .tbody();
     }
 
@@ -91,31 +80,11 @@ public class TracksView implements View<Observable<Track>> {
                 .a()
                 .attrHref(track.getUrl())
                 .text(track.getName())
-                .__()
-                .__()
+                .__() // a
+                .__() // td
                 .td()
                 .text(Duration.ofSeconds(track.getDuration()).toString().replace("PT", "").toLowerCase())
-                .__()
-                .__(); // td
-//                .td()
-//                .text(artist.getTracks().get())
-//                .__(); // td
-    }
-
-    private static class ResponsePrintStream extends PrintStream {
-        /**
-         * We may improve this with a Buffer.
-         * For now we just want to see the effect of sending
-         * char by char to the browser !!!
-         */
-        public ResponsePrintStream(HttpServerResponse resp) {
-            super(new OutputStream() {
-                @Override
-                public void write(int b) throws IOException {
-                    char c = (char) b;
-                    resp.write(String.valueOf(c));
-                }
-            });
-        }
+                .__() // td
+                .__(); //tr
     }
 }
