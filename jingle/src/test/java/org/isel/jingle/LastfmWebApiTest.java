@@ -35,6 +35,7 @@ import org.isel.jingle.dto.ArtistDto;
 import org.isel.jingle.dto.TrackDto;
 import org.isel.jingle.dto.TrackRankDto;
 import org.junit.Test;
+import util.req.AsyncCompletionHandlerBaseCount;
 import util.req.AsyncHttpRequest;
 import util.req.AsyncRequest;
 
@@ -47,7 +48,7 @@ import static junit.framework.Assert.assertEquals;
 public class LastfmWebApiTest {
     @Test
     public void searchForArtistsNamedDavid() throws ExecutionException, InterruptedException {
-        AsyncRequest req = new AsyncHttpRequest();
+        AsyncRequest req = new AsyncHttpRequest(new AsyncCompletionHandlerBaseCount());
         LastfmWebApi api = new LastfmWebApi(req);
         CompletableFuture<ArtistDto[]> artists = api.searchArtist("david", 1);
         String name = artists.get()[0].getName();
@@ -56,7 +57,7 @@ public class LastfmWebApiTest {
 
     @Test
     public void getTopAlbumsFromMuse() throws ExecutionException, InterruptedException {
-        AsyncRequest req = new AsyncHttpRequest();
+        AsyncRequest req = new AsyncHttpRequest(new AsyncCompletionHandlerBaseCount());
         LastfmWebApi api = new LastfmWebApi(req);
         CompletableFuture<ArtistDto[]> artists = api.searchArtist("muse", 1);
         String mbid = artists.get()[0].getMbid();
@@ -66,7 +67,7 @@ public class LastfmWebApiTest {
 
     @Test
     public void getStarlightFromBlackHolesAlbumOfMuse() throws ExecutionException, InterruptedException {
-        AsyncRequest req = new AsyncHttpRequest();
+        AsyncRequest req = new AsyncHttpRequest(new AsyncCompletionHandlerBaseCount());
         LastfmWebApi api = new LastfmWebApi(req);
         CompletableFuture<ArtistDto[]> artistsCF = api.searchArtist("muse", 1);
         String mbid = artistsCF.get()[0].getMbid();
@@ -77,7 +78,7 @@ public class LastfmWebApiTest {
 
     @Test
     public void getTopTracksFromSpainFirstPage() throws ExecutionException, InterruptedException {
-        AsyncRequest req = new AsyncHttpRequest();
+        AsyncRequest req = new AsyncHttpRequest(new AsyncCompletionHandlerBaseCount());
         LastfmWebApi api = new LastfmWebApi(req);
         CompletableFuture<TrackRankDto[]> topTracks = api.getTopTracks("Spain", 1);
         TrackRankDto firstRankingTrack = topTracks.get()[0];

@@ -70,30 +70,48 @@ public class LastfmWebApi {
     }
 
     public CompletableFuture<ArtistDto[]> searchArtist(String name, int page) {
+//        if(name == null)
+//            return CompletableFuture.completedFuture(new ArtistDto[0]);
         String path = String.format(LASTFM_SEARCH, name, page);
         return request.getLines(path).thenApply(body -> {
             SearchArtistDto dto = gson.fromJson(body, SearchArtistDto.class);
+            System.out.println(path);
+            System.out.println(body);
             return dto.getResults().getArtistmatches().getArtist();
         });
     }
     public CompletableFuture<AlbumDto[]> getAlbums(String artistMbid, int page) {
+//        if(artistMbid == null)
+//            return CompletableFuture.completedFuture(new AlbumDto[0]);
         String path = String.format(LASTFM_GET_ALBUMS, artistMbid, page);
         return request.getLines(path).thenApply(body -> {
             GetAlbumDto dto = gson.fromJson(body, GetAlbumDto.class);
+            System.out.println(path);
+            System.out.println(body);
             return dto.getTopalbums().getAlbum();
         });
     }
     public CompletableFuture<TrackDto[]> getAlbumInfo(String albumMbid){
+//        if(albumMbid == null)
+//            return CompletableFuture.completedFuture(new TrackDto[0]);
         String path = String.format(LASTFM_GET_ALBUM_INFO, albumMbid);
         return request.getLines(path).thenApply(body -> {
             GetAlbumInfoDto dto = gson.fromJson(body, GetAlbumInfoDto.class);
+            System.out.println(path);
+            System.out.println(body);
+            if (dto.getAlbum() == null)
+                return new TrackDto[0];
             return dto.getAlbum().getTracks().getTrack();
         });
     }
     public CompletableFuture<TrackRankDto[]> getTopTracks(String country, int page){
+//        if(country == null)
+//            return CompletableFuture.completedFuture(new TrackRankDto[0]);
         String path = String.format(LASTFM_GET_TOP_TRACKS, country, page);
         return request.getLines(path).thenApply(body -> {
             GetTopTracksDto dto = gson.fromJson(body, GetTopTracksDto.class);
+            System.out.println(path);
+            System.out.println(body);
             for (TrackRankDto track : dto.getTracks().getTrack())
                 track.setPage(dto.getTracks().getAttr().getPage());
             return dto.getTracks().getTrack();
