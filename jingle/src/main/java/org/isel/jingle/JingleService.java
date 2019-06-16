@@ -104,11 +104,8 @@ public class JingleService implements AutoCloseable{
     public Observable<TrackRank> getTracksRank(String artistsMbId, String country){
         Observable<Track> tracks = getTracks(artistsMbId);
         Observable<TrackRank> topTracks = getTopTracks(country).takeWhile(track -> track.getRank() <= 100);
+        //???
 
-        Disposable sub = tracks.subscribe();
-        //sub. ???
-
-        //return Observable
         return null;
 
 //        Stream<Track> tracks = getTracks(artistsMbId);
